@@ -1,0 +1,43 @@
+<div class="sidebar">
+    <div class="sidebar-brand d-flex align-items-center">
+        <i class="bi bi-file-earmark-spreadsheet-fill text-info me-2 fs-4"></i>
+        <span>Invoice & Surat Jalan</span>
+    </div>
+    <ul class="sidebar-menu">
+        <li class="menu-header">Menu Utama</li>
+        <li>
+            <a href="/dashboard" class="<%= (typeof activePage !== 'undefined' && activePage === 'dashboard') ? 'active' : '' %>">
+                <i class="bi bi-speedometer2"></i> Dashboard
+            </a>
+        </li>
+
+        <li class="menu-header">Transaksi</li>
+        <li>
+            <a href="/transactions/create" class="<%= (typeof activePage !== 'undefined' && activePage === 'create-transaction') ? 'active' : '' %>">
+                <i class="bi bi-plus-circle"></i> Buat Transaksi Baru
+            </a>
+        </li>
+        <li>
+            <a href="/transactions" class="<%= (typeof activePage !== 'undefined' && activePage === 'transactions') ? 'active' : '' %>">
+                <i class="bi bi-clock-history"></i> Riwayat Transaksi
+            </a>
+        </li>
+
+        <li class="menu-header">Data Master</li>
+        <li>
+            <a href="/products" class="<%= (typeof activePage !== 'undefined' && activePage === 'products') ? 'active' : '' %>">
+                <i class="bi bi-box-seam"></i> Master Produk
+            </a>
+        </li>
+        <li>
+            <a href="/customers" class="<%= (typeof activePage !== 'undefined' && activePage === 'customers') ? 'active' : '' %>">
+                <i class="bi bi-people"></i> Master Customer
+            </a>
+        </li>
+        <li>
+            <a href="/units" class="<%= (typeof activePage !== 'undefined' && activePage === 'units') ? 'active' : '' %>">
+                <i class="bi bi-tags"></i> Master Satuan
+            </a>
+        </li>
+    </ul>
+</div>

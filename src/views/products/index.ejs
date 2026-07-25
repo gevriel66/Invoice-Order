@@ -1,0 +1,229 @@
+<%- include('../partials/header') %>
+<%- include('../partials/sidebar') %>
+
+<div class="main-content">
+    <%- include('../partials/navbar') %>
+
+    <div class="container-fluid p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold text-dark mb-1">Master Produk</h3>
+                <p class="text-muted small mb-0">Kelola daftar item barang, harga jual, dan pilihan satuan dari Master Satuan.</p>
+            </div>
+            <button type="button" class="btn btn-primary btn-primary-custom" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                <i class="bi bi-plus-lg me-1"></i> Tambah Produk
+            </button>
+        </div>
+
+        <% if (success) { %>
+            <div class="alert alert-success alert-dismissible fade show small" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i> <%= success %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <% } %>
+        <% if (error) { %>
+            <div class="alert alert-danger alert-dismissible fade show small" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> <%= error %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <% } %>
+
+        <div class="card card-custom mb-4">
+            <div class="card-body p-3">
+                <form action="/products" method="GET" class="row g-2">
+                    <div class="col-md-5">
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                            <input type="text" class="form-control border-start-0 ps-0" name="search" placeholder="Cari nama produk, kode, atau merek..." value="<%= search %>">
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-secondary w-100"><i class="bi bi-filter me-1"></i> Filter</button>
+                    </div>
+                    <% if (search) { %>
+                        <div class="col-md-2">
+                            <a href="/products" class="btn btn-outline-secondary w-100">Reset</a>
+                        </div>
+                    <% } %>
+                </form>
+            </div>
+        </div>
+
+        <div class="card card-custom">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-custom align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th class="ps-4">Kode</th>
+                                <th>Nama Produk</th>
+                                <th>Merek</th>
+                                <th>Harga (Rp)</th>
+                                <th>Satuan</th>
+                                <th class="text-end pe-4">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (products.length === 0) { %>
+                                <tr>
+                                    <td colspan="6" class="text-center py-4 text-muted">Tidak ada data produk ditemukan.</td>
+                                </tr>
+                            <% } else { %>
+                                <% products.forEach(product => { %>
+                                    <tr>
+                                        <td class="ps-4 text-muted small"><%= product.code || '-' %></td>
+                                        <td class="fw-semibold text-dark"><%= product.name %></td>
+                                        <td><%= product.brand || '-' %></td>
+                                        <td class="fw-medium text-success">Rp <%= Number(product.price).toLocaleString('id-ID') %></td>
+                                        <td>
+                                            <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1">
+                                                <%= product.unit_code || product.unit_name || 'PCS' %>
+                                            </span>
+                                        </td>
+                                        <td class="text-end pe-4">
+                                            <button class="btn btn-sm btn-outline-primary me-1" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#editProductModal"
+                                                    data-id="<%= product.id %>"
+                                                    data-code="<%= product.code || '' %>"
+                                                    data-name="<%= product.name %>"
+                                                    data-price="<%= product.price %>"
+                                                    data-unit_id="<%= product.unit_id || '' %>"
+                                                    data-brand="<%= product.brand || '' %>"
+                                                    data-description="<%= product.description || '' %>">
+                                                <i class="bi bi-pencil-square"></i> Edit
+                                            </button>
+                                            <form action="/products/delete/<%= product.id %>" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus produk <%= product.name %>?')">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                    <i class="bi bi-trash"></i> Hapus
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Add Product -->
+    <div class="modal fade" id="addProductModal" tabindex="-1">
+        <div class="modal-dialog">
+            <form action="/products/create" method="POST" class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Tambah Produk Baru</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="code" class="form-label small fw-semibold">Kode Produk (Opsional)</label>
+                        <input type="text" class="form-control" id="code" name="code" placeholder="Contoh: PRD-001">
+                    </div>
+                    <div class="mb-3">
+                        <label for="name" class="form-label small fw-semibold">Nama Produk</label>
+                        <input type="text" class="form-control" id="name" name="name" required placeholder="Contoh: Cooking Cream Milack Gold">
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label for="price" class="form-label small fw-semibold">Harga Satuan (Rp)</label>
+                            <input type="number" class="form-control" id="price" name="price" required min="0" step="500" placeholder="0">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="unit_id" class="form-label small fw-semibold">Satuan (Pilihan Master)</label>
+                            <select class="form-select" id="unit_id" name="unit_id" required>
+                                <option value="">-- Pilih Satuan --</option>
+                                <% units.forEach(unit => { %>
+                                    <option value="<%= unit.id %>"><%= unit.code %> (<%= unit.name %>)</option>
+                                <% }) %>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="brand" class="form-label small fw-semibold">Merek (Opsional)</label>
+                        <input type="text" class="form-control" id="brand" name="brand" placeholder="Contoh: Milack">
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label small fw-semibold">Deskripsi</label>
+                        <textarea class="form-control" id="description" name="description" rows="2" placeholder="Keterangan produk..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary btn-primary-custom">Simpan Produk</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Edit Product -->
+    <div class="modal fade" id="editProductModal" tabindex="-1">
+        <div class="modal-dialog">
+            <form action="/products/update" method="POST" class="modal-content">
+                <input type="hidden" id="edit_id" name="id">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Edit Data Produk</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="edit_code" class="form-label small fw-semibold">Kode Produk</label>
+                        <input type="text" class="form-control" id="edit_code" name="code">
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_name" class="form-label small fw-semibold">Nama Produk</label>
+                        <input type="text" class="form-control" id="edit_name" name="name" required>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label for="edit_price" class="form-label small fw-semibold">Harga Satuan (Rp)</label>
+                            <input type="number" class="form-control" id="edit_price" name="price" required min="0" step="500">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="edit_unit_id" class="form-label small fw-semibold">Satuan (Pilihan Master)</label>
+                            <select class="form-select" id="edit_unit_id" name="unit_id" required>
+                                <option value="">-- Pilih Satuan --</option>
+                                <% units.forEach(unit => { %>
+                                    <option value="<%= unit.id %>"><%= unit.code %> (<%= unit.name %>)</option>
+                                <% }) %>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_brand" class="form-label small fw-semibold">Merek</label>
+                        <input type="text" class="form-control" id="edit_brand" name="brand">
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_description" class="form-label small fw-semibold">Deskripsi</label>
+                        <textarea class="form-control" id="edit_description" name="description" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary btn-primary-custom">Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const editModal = document.getElementById('editProductModal');
+            if (editModal) {
+                editModal.addEventListener('show.bs.modal', function(event) {
+                    const button = event.relatedTarget;
+                    document.getElementById('edit_id').value = button.getAttribute('data-id');
+                    document.getElementById('edit_code').value = button.getAttribute('data-code') || '';
+                    document.getElementById('edit_name').value = button.getAttribute('data-name');
+                    document.getElementById('edit_price').value = button.getAttribute('data-price');
+                    document.getElementById('edit_unit_id').value = button.getAttribute('data-unit_id') || '';
+                    document.getElementById('edit_brand').value = button.getAttribute('data-brand') || '';
+                    document.getElementById('edit_description').value = button.getAttribute('data-description') || '';
+                });
+            }
+        });
+    </script>
+
+<%- include('../partials/footer') %>

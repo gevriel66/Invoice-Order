@@ -1,0 +1,294 @@
+<%- include('../partials/header') %>
+<%- include('../partials/sidebar') %>
+
+<div class="main-content">
+    <%- include('../partials/navbar') %>
+
+    <div class="container-fluid p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold text-dark mb-1">Buat Transaksi Baru</h3>
+                <p class="text-muted small mb-0">Input data transaksi, pilih customer, pilih produk dengan autocomplete & kalkulasi realtime.</p>
+            </div>
+            <a href="/transactions" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i> Kembali ke Riwayat
+            </a>
+        </div>
+
+        <% if (error) { %>
+            <div class="alert alert-danger alert-dismissible fade show small" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> <%= error %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <% } %>
+
+        <form action="/transactions/create" method="POST" id="transactionForm">
+            <input type="hidden" name="action_status" id="action_status" value="DRAFT">
+
+            <!-- Card 1: Header Transaksi & Customer Selection -->
+            <div class="card card-custom mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="fw-bold text-dark mb-0 fs-6"><i class="bi bi-person-badge text-primary me-2"></i> Informasi Pelanggan & Dokumen</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="customer_id" class="form-label small fw-semibold">Pilih Customer (Master Data)</label>
+                            <select class="form-select" id="customer_id" name="customer_id" onchange="onCustomerSelect(this)">
+                                <option value="">-- Pilih Customer --</option>
+                                <% customers.forEach(c => { %>
+                                    <option value="<%= c.id %>" 
+                                            data-name="<%= c.name %>"
+                                            data-company="<%= c.company || '' %>"
+                                            data-address="<%= c.address || '' %>"
+                                            data-phone="<%= c.phone || '' %>">
+                                        <%= c.name %> <%= c.company ? '(' + c.company + ')' : '' %>
+                                    </option>
+                                <% }) %>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="customer_name_snapshot" class="form-label small fw-semibold">Nama Pelanggan (Bill To) <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="customer_name_snapshot" name="customer_name_snapshot" required placeholder="Nama penerima tagihan">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="customer_company_snapshot" class="form-label small fw-semibold">Nama Perusahaan / Toko</label>
+                            <input type="text" class="form-control" id="customer_company_snapshot" name="customer_company_snapshot" placeholder="Toko / Perusahaan">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="customer_phone_snapshot" class="form-label small fw-semibold">No Telepon / WA</label>
+                            <input type="text" class="form-control" id="customer_phone_snapshot" name="customer_phone_snapshot" placeholder="No HP/WA">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="customer_address_snapshot" class="form-label small fw-semibold">Alamat Pengiriman</label>
+                            <input type="text" class="form-control" id="customer_address_snapshot" name="customer_address_snapshot" placeholder="Alamat pengiriman">
+                        </div>
+
+                        <hr class="my-2 border-light">
+
+                        <div class="col-md-3">
+                            <label for="order_date" class="form-label small fw-semibold">Tanggal Transaksi <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="order_date" name="order_date" required value="<%= todayStr %>">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="due_date" class="form-label small fw-semibold">Jatuh Tempo (Due Date)</label>
+                            <input type="date" class="form-control" id="due_date" name="due_date">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="po_number" class="form-label small fw-semibold">No. PO (Purchase Order)</label>
+                            <input type="text" class="form-control" id="po_number" name="po_number" placeholder="Contoh: 30062026/091">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="ref_number" class="form-label small fw-semibold">No. Referensi / Reff</label>
+                            <input type="text" class="form-control" id="ref_number" name="ref_number" placeholder="Contoh: INV/8863221">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2: Items Table -->
+            <div class="card card-custom mb-4">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold text-dark mb-0 fs-6"><i class="bi bi-cart-check text-success me-2"></i> Daftar Produk Transaksi</h5>
+                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="addRow()">
+                        <i class="bi bi-plus-lg me-1"></i> Tambah Baris Produk
+                    </button>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle mb-0" id="itemsTable">
+                            <thead class="table-light text-secondary small text-uppercase">
+                                <tr>
+                                    <th style="width: 40px;" class="text-center">#</th>
+                                    <th style="min-width: 250px;">Nama Produk (Autocomplete)</th>
+                                    <th style="width: 140px;">Harga (Rp)</th>
+                                    <th style="width: 100px;">Satuan</th>
+                                    <th style="width: 120px;">Merek</th>
+                                    <th style="width: 90px;">Qty</th>
+                                    <th style="width: 150px;" class="text-end">Subtotal (Rp)</th>
+                                    <th style="width: 50px;" class="text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="itemsTbody">
+                                <!-- Dynamic rows inserted via JS -->
+                            </tbody>
+                            <tfoot class="table-light">
+                                <tr>
+                                    <td colspan="6" class="text-end fw-bold fs-6">TOTAL PENJUALAN:</td>
+                                    <td class="text-end fw-bold text-success fs-5" id="grandTotalText">Rp 0</td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3: Additional Notes & Submissions -->
+            <div class="card card-custom mb-4">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="sender_info" class="form-label small fw-semibold">Informasi Pengirim (Surat Jalan)</label>
+                            <input type="text" class="form-control" id="sender_info" name="sender_info" value="Grocery Kuliner Nusantara">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="recipient_info" class="form-label small fw-semibold">Informasi Penerima (Surat Jalan)</label>
+                            <input type="text" class="form-control" id="recipient_info" name="recipient_info" placeholder="Contoh: Toko Gladya Surabaya">
+                        </div>
+                        <div class="col-md-12">
+                            <label for="notes" class="form-label small fw-semibold">Catatan Transaksi</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="2">Barang yang sudah dibeli tidak dapat ditukar atau di kembalikan</textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-white py-3 d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-secondary px-4" onclick="submitForm('DRAFT')">
+                        <i class="bi bi-save me-1"></i> Simpan DRAFT
+                    </button>
+                    <button type="button" class="btn btn-success px-4 fw-semibold" onclick="submitForm('FINAL')">
+                        <i class="bi bi-check2-circle me-1"></i> Simpan & FINALKAN
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Data Products JSON for Autocomplete -->
+    <script>
+        const masterProducts = <%- JSON.stringify(products) %>;
+
+        function onCustomerSelect(selectElem) {
+            const opt = selectElem.options[selectElem.selectedIndex];
+            if (opt && opt.value) {
+                document.getElementById('customer_name_snapshot').value = opt.getAttribute('data-name') || '';
+                document.getElementById('customer_company_snapshot').value = opt.getAttribute('data-company') || '';
+                document.getElementById('customer_address_snapshot').value = opt.getAttribute('data-address') || '';
+                document.getElementById('customer_phone_snapshot').value = opt.getAttribute('data-phone') || '';
+                document.getElementById('recipient_info').value = opt.getAttribute('data-company') || opt.getAttribute('data-name') || '';
+            }
+        }
+
+        let rowCount = 0;
+
+        function addRow(defaultProduct = null) {
+            rowCount++;
+            const tbody = document.getElementById('itemsTbody');
+            const tr = document.createElement('tr');
+            tr.id = `row_${rowCount}`;
+
+            let optionsHtml = '<option value="">-- Pilih / Ketik Produk --</option>';
+            masterProducts.forEach(p => {
+                const isSelected = defaultProduct && defaultProduct.id === p.id ? 'selected' : '';
+                optionsHtml += `<option value="${p.id}" data-name="${p.name}" data-code="${p.code || ''}" data-price="${p.price}" data-unit="${p.unit_code || p.unit_name || 'PCS'}" data-brand="${p.brand || ''}" ${isSelected}>${p.name} (Rp ${Number(p.price).toLocaleString('id-ID')})</option>`;
+            });
+
+            tr.innerHTML = `
+                <td class="text-center text-muted row-num">${rowCount}</td>
+                <td>
+                    <select class="form-select form-select-sm product-select" name="product_select_${rowCount}" onchange="onProductSelect(${rowCount}, this)">
+                        ${optionsHtml}
+                    </select>
+                    <input type="hidden" name="product_id" id="product_id_${rowCount}">
+                    <input type="hidden" name="product_code" id="product_code_${rowCount}">
+                    <input type="text" class="form-control form-control-sm mt-1" name="product_name" id="product_name_${rowCount}" placeholder="Nama Produk" required>
+                </td>
+                <td>
+                    <input type="number" class="form-control form-control-sm text-end" name="price" id="price_${rowCount}" value="0" min="0" step="500" oninput="calculateRow(${rowCount})" required>
+                </td>
+                <td>
+                    <input type="text" class="form-control form-control-sm" name="unit" id="unit_${rowCount}" value="PCS" required>
+                </td>
+                <td>
+                    <input type="text" class="form-control form-control-sm" name="brand" id="brand_${rowCount}" placeholder="Merek">
+                </td>
+                <td>
+                    <input type="number" class="form-control form-control-sm text-center" name="quantity" id="quantity_${rowCount}" value="1" min="1" step="1" oninput="calculateRow(${rowCount})" required>
+                </td>
+                <td class="text-end fw-bold text-secondary subtotal-text" id="subtotal_text_${rowCount}">
+                    Rp 0
+                </td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeRow(${rowCount})">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </td>
+            `;
+
+            tbody.appendChild(tr);
+            updateRowNumbers();
+        }
+
+        function removeRow(id) {
+            const tbody = document.getElementById('itemsTbody');
+            if (tbody.children.length <= 1) {
+                alert('Transaksi minimal harus memiliki 1 baris produk.');
+                return;
+            }
+            const row = document.getElementById(`row_${id}`);
+            if (row) {
+                row.remove();
+                updateRowNumbers();
+                calculateGrandTotal();
+            }
+        }
+
+        function updateRowNumbers() {
+            const rows = document.querySelectorAll('#itemsTbody tr');
+            rows.forEach((r, idx) => {
+                const numTd = r.querySelector('.row-num');
+                if (numTd) numTd.innerText = idx + 1;
+            });
+        }
+
+        function onProductSelect(rowId, selectElem) {
+            const opt = selectElem.options[selectElem.selectedIndex];
+            if (opt && opt.value) {
+                document.getElementById(`product_id_${rowId}`).value = opt.value;
+                document.getElementById(`product_code_${rowId}`).value = opt.getAttribute('data-code') || '';
+                document.getElementById(`product_name_${rowId}`).value = opt.getAttribute('data-name') || '';
+                document.getElementById(`price_${rowId}`).value = opt.getAttribute('data-price') || 0;
+                document.getElementById(`unit_${rowId}`).value = opt.getAttribute('data-unit') || 'PCS';
+                document.getElementById(`brand_${rowId}`).value = opt.getAttribute('data-brand') || '';
+                calculateRow(rowId);
+            }
+        }
+
+        function calculateRow(rowId) {
+            const price = parseFloat(document.getElementById(`price_${rowId}`).value) || 0;
+            const qty = parseFloat(document.getElementById(`quantity_${rowId}`).value) || 0;
+            const subtotal = price * qty;
+
+            document.getElementById(`subtotal_text_${rowId}`).innerText = 'Rp ' + subtotal.toLocaleString('id-ID');
+            calculateGrandTotal();
+        }
+
+        function calculateGrandTotal() {
+            let total = 0;
+            const rows = document.querySelectorAll('#itemsTbody tr');
+            rows.forEach(r => {
+                const price = parseFloat(r.querySelector('input[name="price"]').value) || 0;
+                const qty = parseFloat(r.querySelector('input[name="quantity"]').value) || 0;
+                total += (price * qty);
+            });
+            document.getElementById('grandTotalText').innerText = 'Rp ' + total.toLocaleString('id-ID');
+        }
+
+        function submitForm(status) {
+            document.getElementById('action_status').value = status;
+            if (status === 'FINAL') {
+                if (!confirm('Apakah Anda yakin ingin MENGFINALKAN transaksi ini? Nomor Invoice resmi akan ter-generate otomatis.')) {
+                    return;
+                }
+            }
+            document.getElementById('transactionForm').submit();
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add initial empty row
+            addRow();
+        });
+    </script>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,28 @@
+{
+  "name": "latihan-invoice-surat-jalan",
+  "version": "1.0.0",
+  "description": "Sistem Web Pembuatan Invoice & Surat Jalan (Node.js + Express + SQLite + EJS + Bootstrap 5)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "start:prod": "cross-env NODE_ENV=production node server.js",
+    "seed": "node src/db/seed.js",
+    "db:seed": "node src/db/seed.js"
+  },
+  "keywords": [
+    "express",
+    "sqlite",
+    "bootstrap5",
+    "invoice",
+    "surat-jalan"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "dotenv": "^16.4.7",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "express-session": "^1.18.1"
+  }
+}

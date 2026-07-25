@@ -1,0 +1,43 @@
+# Dependency directories
+node_modules/
+
+# Environment files
+.env
+!.env.example
+
+# Database files
+*.sqlite
+*.sqlite-journal
+*.sqlite-shm
+*.sqlite-wal
+
+# Dynamic directories & storage files
+temp/*
+!temp/.gitkeep
+
+logs/*
+!logs/.gitkeep
+
+storage/documents/invoice/*
+!storage/documents/invoice/.gitkeep
+
+storage/documents/surat-jalan/*
+!storage/documents/surat-jalan/.gitkeep
+
+storage/backups/*
+!storage/backups/.gitkeep
+
+# Log files
+*.log
+
+# PM2
+.pids/
+
+# Windows
+*.stackdump
+
+# Operating System & IDE files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

@@ -1,0 +1,156 @@
+<%- include('../partials/header') %>
+<%- include('../partials/sidebar') %>
+
+<div class="main-content">
+    <%- include('../partials/navbar') %>
+
+    <div class="container-fluid p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold text-dark mb-1">Master Satuan</h3>
+                <p class="text-muted small mb-0">Kelola pilihan satuan ukuran produk (PCS, PAK, SLOP, BOX, dll.)</p>
+            </div>
+            <button type="button" class="btn btn-primary btn-primary-custom" data-bs-toggle="modal" data-bs-target="#addUnitModal">
+                <i class="bi bi-plus-lg me-1"></i> Tambah Satuan
+            </button>
+        </div>
+
+        <% if (success) { %>
+            <div class="alert alert-success alert-dismissible fade show small" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i> <%= success %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <% } %>
+        <% if (error) { %>
+            <div class="alert alert-danger alert-dismissible fade show small" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> <%= error %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <% } %>
+
+        <div class="card card-custom">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-custom align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th class="ps-4">Kode Satuan</th>
+                                <th>Nama Satuan</th>
+                                <th>Deskripsi</th>
+                                <th class="text-end pe-4">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (units.length === 0) { %>
+                                <tr>
+                                    <td colspan="4" class="text-center py-4 text-muted">Belum ada data satuan. Klik "Tambah Satuan" untuk membuat data baru.</td>
+                                </tr>
+                            <% } else { %>
+                                <% units.forEach(unit => { %>
+                                    <tr>
+                                        <td class="ps-4 fw-semibold text-dark"><span class="badge bg-secondary-subtle text-secondary border px-2 py-1"><%= unit.code %></span></td>
+                                        <td><%= unit.name %></td>
+                                        <td class="text-muted small"><%= unit.description || '-' %></td>
+                                        <td class="text-end pe-4">
+                                            <button class="btn btn-sm btn-outline-primary me-1" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#editUnitModal"
+                                                    data-id="<%= unit.id %>"
+                                                    data-name="<%= unit.name %>"
+                                                    data-code="<%= unit.code %>"
+                                                    data-description="<%= unit.description %>">
+                                                <i class="bi bi-pencil-square"></i> Edit
+                                            </button>
+                                            <form action="/units/delete/<%= unit.id %>" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus satuan <%= unit.code %>?')">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                    <i class="bi bi-trash"></i> Hapus
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Add Unit -->
+    <div class="modal fade" id="addUnitModal" tabindex="-1">
+        <div class="modal-dialog">
+            <form action="/units/create" method="POST" class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Tambah Satuan Baru</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="code" class="form-label small fw-semibold">Kode Satuan (Misal: PCS, PAK, SLOP)</label>
+                        <input type="text" class="form-control" id="code" name="code" required placeholder="Contoh: PCS">
+                    </div>
+                    <div class="mb-3">
+                        <label for="name" class="form-label small fw-semibold">Nama Lengkap Satuan</label>
+                        <input type="text" class="form-control" id="name" name="name" required placeholder="Contoh: Pieces">
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label small fw-semibold">Deskripsi (Opsional)</label>
+                        <textarea class="form-control" id="description" name="description" rows="2" placeholder="Keterangan tambahan..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary btn-primary-custom">Simpan Satuan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Edit Unit -->
+    <div class="modal fade" id="editUnitModal" tabindex="-1">
+        <div class="modal-dialog">
+            <form action="/units/update" method="POST" class="modal-content">
+                <input type="hidden" id="edit_id" name="id">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Edit Data Satuan</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="edit_code" class="form-label small fw-semibold">Kode Satuan</label>
+                        <input type="text" class="form-control" id="edit_code" name="code" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_name" class="form-label small fw-semibold">Nama Lengkap Satuan</label>
+                        <input type="text" class="form-control" id="edit_name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_description" class="form-label small fw-semibold">Deskripsi</label>
+                        <textarea class="form-control" id="edit_description" name="description" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary btn-primary-custom">Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const editModal = document.getElementById('editUnitModal');
+            if (editModal) {
+                editModal.addEventListener('show.bs.modal', function(event) {
+                    const button = event.relatedTarget;
+                    document.getElementById('edit_id').value = button.getAttribute('data-id');
+                    document.getElementById('edit_name').value = button.getAttribute('data-name');
+                    document.getElementById('edit_code').value = button.getAttribute('data-code');
+                    document.getElementById('edit_description').value = button.getAttribute('data-description') || '';
+                });
+            }
+        });
+    </script>
+
+<%- include('../partials/footer') %>
