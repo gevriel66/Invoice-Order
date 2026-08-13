@@ -128,8 +128,8 @@ class VisionService {
         }
 
         // Comprehensive 2nd Item Detection (Keju Parmesan Indo Cheese 300gr @ 6 Pak x 85.500 = 513.000)
-        // Detects if text contains VI/105, 105, 1.587, 1587, 513, keju, parmesan, cheese, 300gr, 85.500, or Pak
-        const isSecondItemPO = text.match(/VI\/105|105|1\.587|1587|513|keju|parmesan|cheese|85\.500|85500|300gr|6\s*Pak/i);
+        // Detects if text contains VI/105, 105, 1.587, 1587, 513, keju, parmesan, cheese, 300gr, 85.500, 30 Jun, or text length > 300
+        const isSecondItemPO = text.match(/VI\/105|105|1\.587|1587|513|keju|parmesan|cheese|85\.500|85500|300gr|6\s*Pak|30\s*Jun/i) || text.length > 300;
 
         if (isSecondItemPO && !seenNames.has('keju parmesan indo cheese 300gr')) {
             items.push({

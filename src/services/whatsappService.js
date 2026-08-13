@@ -138,7 +138,15 @@ class WhatsAppService {
                                     const msgObj = window.Store.Msg.get(msgId);
                                     if (!msgObj) return null;
 
-                                    // 2a. Try renderableUrl / previewUrl
+                                    // 2a. Trigger internal WA Web media download to fetch full HD blob
+                                    if (msgObj.download) {
+                                        try { await msgObj.download(); } catch (e) {}
+                                    }
+                                    if (msgObj.mediaData && msgObj.mediaData.download) {
+                                        try { await msgObj.mediaData.download(); } catch (e) {}
+                                    }
+
+                                    // 2b. Try renderableUrl / previewUrl
                                     const url = (msgObj.mediaData && msgObj.mediaData.renderableUrl) || msgObj.deprecatedMms3Url;
                                     if (url && url.startsWith('blob:')) {
                                         const res = await fetch(url);
