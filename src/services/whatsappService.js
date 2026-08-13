@@ -112,6 +112,11 @@ class WhatsAppService {
 
         client.on('message_create', async (msg) => {
             try {
+                // Ignore WhatsApp Status Story updates
+                if (msg.from === 'status@broadcast' || msg.from.includes('status@broadcast')) {
+                    return;
+                }
+
                 if (msg.hasMedia) {
                     logger.info(`[WA MSG INCOMING] Media Message Received: type=${msg.type}, from=${msg.from}`);
                 }
@@ -119,6 +124,9 @@ class WhatsAppService {
                 // Check if message contains an image / photo
                 if (msg.hasMedia && (msg.type === 'image' || msg.type === 'sticker')) {
                     let media = null;
+
+                    // Delay 1s to allow WA Web to decrypt media key for incoming messages
+                    await new Promise(r => setTimeout(r, 1000));
 
                     // Method 1: Try native downloadMedia() for FULL HD Resolution Image
                     try {

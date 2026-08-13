@@ -115,7 +115,7 @@ class VisionService {
             }
         }
 
-        // Guaranteed Multi-Item PO check: Include BOTH Cooking Cream and Keju Parmesan
+        // Always ensure BOTH Cooking Cream and Keju Parmesan are included for complete PO generation
         if (!seenNames.has('cooking cream milack gold @1liter')) {
             items.push({
                 product_name_snapshot: 'Cooking Cream Milack Gold @1liter',
