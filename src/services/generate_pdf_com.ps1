@@ -44,6 +44,8 @@ try {
 
     $excel.Visible = $false
     $excel.DisplayAlerts = $false
+    $excel.ScreenUpdating = $false
+    $excel.EnableEvents = $false
 
     $invNumClean = if ($order.invoice_number) { $order.invoice_number.Replace('/', '_') } else { "DRAFT_" + $order.id }
     $result = @{}
