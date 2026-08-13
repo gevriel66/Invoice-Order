@@ -26,7 +26,13 @@ class DocumentController {
             return res.redirect('/transactions?error=File+Invoice+PDF+belum+dibuat');
         }
 
-        const fullPath = path.join(__dirname, '../../', order.invoice_pdf_path);
+        const baseStorageDir = path.resolve(__dirname, '../../storage');
+        const fullPath = path.resolve(__dirname, '../../', order.invoice_pdf_path);
+
+        if (!fullPath.startsWith(baseStorageDir)) {
+            return res.redirect(`/transactions/${req.params.id}?error=Akses+file+ditolak+karena+alasan+keamanan`);
+        }
+
         if (!fs.existsSync(fullPath)) {
             return res.redirect(`/transactions/${req.params.id}?error=File+PDF+Invoice+tidak+ditemukan+di+storage`);
         }
@@ -40,7 +46,13 @@ class DocumentController {
             return res.redirect('/transactions?error=File+Surat+Jalan+PDF+belum+dibuat');
         }
 
-        const fullPath = path.join(__dirname, '../../', order.surat_jalan_pdf_path);
+        const baseStorageDir = path.resolve(__dirname, '../../storage');
+        const fullPath = path.resolve(__dirname, '../../', order.surat_jalan_pdf_path);
+
+        if (!fullPath.startsWith(baseStorageDir)) {
+            return res.redirect(`/transactions/${req.params.id}?error=Akses+file+ditolak+karena+alasan+keamanan`);
+        }
+
         if (!fs.existsSync(fullPath)) {
             return res.redirect(`/transactions/${req.params.id}?error=File+PDF+Surat+Jalan+tidak+ditemukan+di+storage`);
         }

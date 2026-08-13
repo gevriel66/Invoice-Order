@@ -89,27 +89,30 @@
         <!-- Document PDF Action Card for FINAL status -->
         <% if (order.status === 'FINAL') { %>
             <div class="card card-custom mb-4 border-primary">
-                <div class="card-header bg-primary-subtle py-3 d-flex justify-content-between align-items-center">
+                <div class="card-header bg-primary-subtle py-3 d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
                     <h6 class="fw-bold text-primary mb-0"><i class="bi bi-file-earmark-pdf me-2"></i> Cetak & Export Dokumen PDF (Template Excel)</h6>
                     <span class="badge bg-primary text-white">Excel COM Automation Engine</span>
                 </div>
                 <div class="card-body">
                     <div class="row align-items-center g-3">
                         <div class="col-md-6">
-                            <div class="d-flex gap-2">
+                            <div class="d-flex flex-wrap gap-2">
                                 <form action="/transactions/<%= order.id %>/generate-pdf" method="POST" class="d-inline">
+                                    <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
                                     <input type="hidden" name="doc_type" value="invoice">
                                     <button type="submit" class="btn btn-outline-primary btn-sm">
                                         <i class="bi bi-file-earmark-spreadsheet me-1"></i> Generate Invoice
                                     </button>
                                 </form>
                                 <form action="/transactions/<%= order.id %>/generate-pdf" method="POST" class="d-inline">
+                                    <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
                                     <input type="hidden" name="doc_type" value="surat_jalan">
                                     <button type="submit" class="btn btn-outline-info btn-sm">
                                         <i class="bi bi-truck me-1"></i> Generate Surat Jalan
                                     </button>
                                 </form>
                                 <form action="/transactions/<%= order.id %>/generate-pdf" method="POST" class="d-inline">
+                                    <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
                                     <input type="hidden" name="doc_type" value="both">
                                     <button type="submit" class="btn btn-primary btn-sm fw-semibold">
                                         <i class="bi bi-collection me-1"></i> Generate Semua
@@ -117,8 +120,8 @@
                                 </form>
                             </div>
                         </div>
-                        <div class="col-md-6 text-end">
-                            <div class="d-flex justify-content-end gap-2">
+                        <div class="col-md-6 text-md-end">
+                            <div class="d-flex flex-wrap justify-content-md-end gap-2">
                                 <% if (order.invoice_pdf_path) { %>
                                     <a href="/documents/invoice/<%= order.id %>" class="btn btn-success btn-sm fw-semibold" target="_blank">
                                         <i class="bi bi-download me-1"></i> Download Invoice PDF
@@ -181,7 +184,7 @@
 
         <!-- Actions Footer Card -->
         <div class="card card-custom">
-            <div class="card-body d-flex justify-content-between align-items-center">
+            <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
                 <div class="text-muted small">
                     <% if (order.status === 'DRAFT') { %>
                         <i class="bi bi-info-circle text-warning me-1"></i> Transaksi masih berstatus DRAFT. Anda dapat mengedit item atau memfinalkannya.
@@ -189,18 +192,20 @@
                         <i class="bi bi-lock-fill text-success me-1"></i> Transaksi berstatus FINAL dengan Nomor Invoice: <strong><%= order.invoice_number %></strong>. Data terkunci untuk menjaga konsistensi riwayat dokumen.
                     <% } %>
                 </div>
-                <div class="d-flex gap-2">
+                <div class="d-flex flex-wrap gap-2">
                     <% if (order.status === 'DRAFT') { %>
                         <a href="/transactions/<%= order.id %>/edit" class="btn btn-warning">
                             <i class="bi bi-pencil-square me-1"></i> Edit Transaksi
                         </a>
                         <form action="/transactions/<%= order.id %>/status" method="POST" class="d-inline" onsubmit="return confirm('Finalkan transaksi ini? Nomor Invoice resmi akan dibuat secara otomatis.')">
+                            <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
                             <input type="hidden" name="status" value="FINAL">
                             <button type="submit" class="btn btn-success">
                                 <i class="bi bi-check2-circle me-1"></i> Finalkan Transaksi
                             </button>
                         </form>
                         <form action="/transactions/<%= order.id %>/status" method="POST" class="d-inline" onsubmit="return confirm('Batalkan transaksi ini?')">
+                            <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
                             <input type="hidden" name="status" value="CANCELLED">
                             <button type="submit" class="btn btn-outline-danger">
                                 <i class="bi bi-x-circle me-1"></i> Batalkan

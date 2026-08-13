@@ -8,9 +8,18 @@ dotenv.config();
 
 const logger = require('./utils/logger');
 const SQLiteSessionStore = require('./utils/sessionStore');
+const csrfProtection = require('./middleware/csrfMiddleware');
 const webRoutes = require('./routes/webRoutes');
 
 const app = express();
+
+// Security Headers Middleware
+app.use((req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    next();
+});
 
 // Ensure required production directories exist on startup
 const storageDir = process.env.STORAGE_DIR ? path.resolve(process.cwd(), process.env.STORAGE_DIR) : path.resolve(process.cwd(), 'storage');
@@ -51,6 +60,9 @@ app.use(session({
         secure: process.env.NODE_ENV === 'production' && process.env.HTTPS === 'true'
     }
 }));
+
+// CSRF Protection Middleware
+app.use(csrfProtection);
 
 // Routes
 app.use('/', webRoutes);

@@ -73,6 +73,7 @@
         <% } %>
 
         <form action="/login" method="POST">
+            <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
             <div class="mb-3">
                 <label for="username" class="form-label fw-medium small text-secondary">Username</label>
                 <div class="input-group">

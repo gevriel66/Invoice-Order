@@ -109,6 +109,40 @@
             background-color: #1d4ed8;
             border-color: #1d4ed8;
         }
+
+        /* Mobile Responsiveness & Drawer CSS */
+        .sidebar-backdrop {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(2px);
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .sidebar-backdrop.show {
+            display: block;
+            opacity: 1;
+        }
+        @media (max-width: 767.98px) {
+            .sidebar {
+                left: calc(-1 * var(--sidebar-width));
+                z-index: 1050;
+            }
+            .sidebar.show {
+                left: 0;
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .navbar-custom {
+                padding: 0.75rem 1rem;
+            }
+        }
     </style>
 </head>
 <body>

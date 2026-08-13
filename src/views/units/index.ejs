@@ -5,12 +5,12 @@
     <%- include('../partials/navbar') %>
 
     <div class="container-fluid p-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
             <div>
                 <h3 class="fw-bold text-dark mb-1">Master Satuan</h3>
                 <p class="text-muted small mb-0">Kelola pilihan satuan ukuran produk (PCS, PAK, SLOP, BOX, dll.)</p>
             </div>
-            <button type="button" class="btn btn-primary btn-primary-custom" data-bs-toggle="modal" data-bs-target="#addUnitModal">
+            <button type="button" class="btn btn-primary btn-primary-custom text-nowrap" data-bs-toggle="modal" data-bs-target="#addUnitModal">
                 <i class="bi bi-plus-lg me-1"></i> Tambah Satuan
             </button>
         </div>
@@ -62,6 +62,7 @@
                                                 <i class="bi bi-pencil-square"></i> Edit
                                             </button>
                                             <form action="/units/delete/<%= unit.id %>" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus satuan <%= unit.code %>?')">
+                                                <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
                                                 <button type="submit" class="btn btn-sm btn-outline-danger">
                                                     <i class="bi bi-trash"></i> Hapus
                                                 </button>
@@ -81,6 +82,7 @@
     <div class="modal fade" id="addUnitModal" tabindex="-1">
         <div class="modal-dialog">
             <form action="/units/create" method="POST" class="modal-content">
+                <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
                 <div class="modal-header">
                     <h5 class="modal-title fw-bold">Tambah Satuan Baru</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -111,6 +113,7 @@
     <div class="modal fade" id="editUnitModal" tabindex="-1">
         <div class="modal-dialog">
             <form action="/units/update" method="POST" class="modal-content">
+                <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
                 <input type="hidden" id="edit_id" name="id">
                 <div class="modal-header">
                     <h5 class="modal-title fw-bold">Edit Data Satuan</h5>

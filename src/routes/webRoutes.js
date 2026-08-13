@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { requireAuth, redirectIfAuth } = require('../middleware/authMiddleware');
+const loginRateLimiter = require('../middleware/rateLimitMiddleware');
 
 const AuthController = require('../controllers/authController');
 const DashboardController = require('../controllers/dashboardController');
@@ -13,7 +14,7 @@ const DocumentController = require('../controllers/documentController');
 // Guest / Authentication Routes
 router.get('/', redirectIfAuth, (req, res) => res.redirect('/login'));
 router.get('/login', redirectIfAuth, AuthController.showLogin);
-router.post('/login', redirectIfAuth, AuthController.handleLogin);
+router.post('/login', loginRateLimiter, redirectIfAuth, AuthController.handleLogin);
 router.get('/logout', AuthController.logout);
 
 // Authenticated Routes
