@@ -1,6 +1,0 @@
-2026/08/13-23:58:50.708 2f20 Reusing MANIFEST C:\Playground\Latihan\storage\wa_session\session-invoice-bot-session\Default\Local Storage\leveldb/MANIFEST-000001
-2026/08/13-23:58:50.733 2f20 Recovering log #3
-2026/08/13-23:58:50.748 2f20 Reusing old log C:\Playground\Latihan\storage\wa_session\session-invoice-bot-session\Default\Local Storage\leveldb/000003.log 
-2026/08/13-23:59:34.901 1d20 Level-0 table #5: started
-2026/08/13-23:59:34.904 1d20 Level-0 table #5: 20541 bytes OK
-2026/08/13-23:59:34.906 1d20 Delete type=0 #3

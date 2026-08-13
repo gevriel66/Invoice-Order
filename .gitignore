@@ -27,6 +27,13 @@ storage/documents/surat-jalan/*
 storage/backups/*
 !storage/backups/.gitkeep
 
+# WhatsApp Bot Session & Cache
+.wwebjs_cache/
+storage/wa_session/
+
+# OCR Traineddata binaries
+*.traineddata
+
 # Log files
 *.log
 
