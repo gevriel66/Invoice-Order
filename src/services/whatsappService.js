@@ -65,6 +65,14 @@ class WhatsAppService {
             qrcode.generate(qr, { small: true });
         });
 
+        client.on('loading_screen', (percent, message) => {
+            logger.info(`[WA SYNC] Progress: ${percent}% - ${message || 'Syncing chats...'}`);
+        });
+
+        client.on('change_state', (state) => {
+            logger.info(`[WA STATE] Current State: ${state}`);
+        });
+
         client.on('ready', () => {
             logger.info('==================================================');
             logger.info('  WhatsApp Bot is READY & Listening for PO Photos!');
