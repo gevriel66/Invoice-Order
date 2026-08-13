@@ -29,7 +29,7 @@ class VisionService {
         const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
 
         let poNumber = '';
-        let customerName = 'Pelanggan General';
+        let customerName = 'Gladya';
         let customerCompany = '';
         const items = [];
         const seenNames = new Set();
@@ -44,7 +44,7 @@ class VisionService {
         const companyMatch = text.match(/PT\.\s*[A-Z0-9\s]+/i) || text.match(/(UNDERGROUND[^\n\r]*)/i);
         if (companyMatch) {
             customerCompany = companyMatch[0].trim();
-            customerName = customerCompany;
+            customerName = 'Gladya';
         }
 
         // 3. Extract Due Date / PO Date (e.g. 8 Agu 2026, 30 Jun 2026, 08/08/2026)

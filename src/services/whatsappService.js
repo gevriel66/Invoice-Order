@@ -114,37 +114,25 @@ class WhatsAppService {
             try {
                 // Check if message contains an image / photo
                 if (msg.hasMedia && (msg.type === 'image' || msg.type === 'sticker')) {
-                    // Download image media from WhatsApp with multi-method fallback
-                    let media = null;
-
-                    // Method 1: Try extracting inline base64 data from msg._data.body if available
-                    if (msg._data && msg._data.body && typeof msg._data.body === 'string' && msg._data.body.length > 50) {
-                        try {
-                            media = new MessageMedia('image/jpeg', msg._data.body, 'wa_po_image.jpg');
-                            logger.info('Successfully extracted media via msg._data.body inline base64!');
-                        } catch (errInline) {
-                            logger.warn(`Inline base64 extraction failed: ${errInline.message}`);
+                    // Method 1: Try native downloadMedia() for FULL HD Resolution Image
+                    try {
+                        media = await msg.downloadMedia();
+                        if (media && media.data && media.data.length > 1000) {
+                            logger.info(`Successfully downloaded HD image via downloadMedia (${media.data.length} bytes)`);
                         }
+                    } catch (err1) {
+                        logger.warn(`Native downloadMedia failed: ${err1.message}`);
                     }
 
-                    // Method 2: Try native downloadMedia()
-                    if (!media || !media.data) {
-                        try {
-                            media = await msg.downloadMedia();
-                        } catch (err1) {
-                            logger.warn(`Native downloadMedia failed: ${err1.message}`);
-                        }
-                    }
-
-                    // Method 3: Try fetching via Puppeteer page Store (renderableUrl / DownloadManager)
-                    if (!media || !media.data) {
+                    // Method 2: Try fetching HD image via Puppeteer page Store (renderableUrl / DownloadManager)
+                    if (!media || !media.data || media.data.length < 1000) {
                         try {
                             const rawMedia = await client.pupPage.evaluate(async (msgId) => {
                                 try {
                                     const msgObj = window.Store.Msg.get(msgId);
                                     if (!msgObj) return null;
 
-                                    // 3a. Try renderableUrl / previewUrl
+                                    // 2a. Try renderableUrl / previewUrl
                                     const url = (msgObj.mediaData && msgObj.mediaData.renderableUrl) || msgObj.deprecatedMms3Url;
                                     if (url && url.startsWith('blob:')) {
                                         const res = await fetch(url);
@@ -159,7 +147,7 @@ class WhatsAppService {
                                         });
                                     }
 
-                                    // 3b. Try DownloadManager downloadAndDecrypt
+                                    // 2b. Try DownloadManager downloadAndDecrypt
                                     if (window.Store.DownloadManager && window.Store.DownloadManager.downloadAndDecrypt) {
                                         const decrypted = await window.Store.DownloadManager.downloadAndDecrypt({
                                             directPath: msgObj.directPath,
@@ -182,17 +170,25 @@ class WhatsAppService {
                                         }
                                     }
                                     return null;
-                                } catch (e) {
-                                    return null;
-                                }
+                                } catch (e) { return null; }
                             }, msg.id._serialized);
 
                             if (rawMedia && rawMedia.data) {
                                 media = new MessageMedia(rawMedia.mimetype, rawMedia.data, 'wa_po_image.jpg');
-                                logger.info('Successfully extracted media via Puppeteer Store fallback!');
+                                logger.info(`Successfully extracted HD media via Puppeteer Store (${media.data.length} bytes)`);
                             }
                         } catch (errEval) {
                             logger.warn(`Puppeteer Store fallback failed: ${errEval.message}`);
+                        }
+                    }
+
+                    // Method 3: Last Resort Fallback - Inline base64 thumbnail
+                    if (!media || !media.data) {
+                        if (msg._data && msg._data.body && typeof msg._data.body === 'string' && msg._data.body.length > 50) {
+                            try {
+                                media = new MessageMedia('image/jpeg', msg._data.body, 'wa_po_image.jpg');
+                                logger.info('Extracted fallback thumbnail media via msg._data.body');
+                            } catch (errInline) {}
                         }
                     }
 
