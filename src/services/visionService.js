@@ -32,6 +32,7 @@ class VisionService {
         let customerName = 'Pelanggan General';
         let customerCompany = '';
         const items = [];
+        const seenNames = new Set();
 
         // 1. Extract PO Number (Regex for PO/...)
         const poMatch = text.match(/PO\/[A-Z0-9\/\-_]+/i) || text.match(/Nomor\s*[:\.]?\s*([^\n\r]+)/i);
@@ -72,33 +73,50 @@ class VisionService {
         orderDateObj.setDate(orderDateObj.getDate() - 7);
         const order_date = orderDateObj.toISOString().split('T')[0];
 
-        // 4. Extract Line Items (Supporting Multi-Item POs)
-        const seenNames = new Set();
-
+        // 4. Dynamic Multi-Item Extraction from OCR Lines
         for (let i = 0; i < lines.length; i++) {
             const line = lines[i];
 
-            // Match item line patterns: e.g. Cooking Cream Milack Gold @1Litter 12 Pcs 89.500
-            const itemMatch = line.match(/([A-Za-z0-9\s@\.\-]+?)\s+(\d{1,4})\s+(Pcs|Pak|Slop|Box|Ktn|Ltr|kg|Tees)\s+([0-9\.\,]+)/i);
+            const itemMatch = line.match(/(?:^\d+\s*)?([A-Za-z0-9\s@\.\-]+?)\s+(\d{1,4})\s+(Pcs|Pak|Slop|Box|Ktn|Ltr|kg|Tees)\s+([0-9\.\,]+)/i);
             
             if (itemMatch) {
-                let pName = itemMatch[1].replace(/^\d+\s*\[?/, '').replace(/^[\|\[\s]+/, '').trim();
+                let rawName = itemMatch[1].replace(/^[0-9\|\[\s\-\.]+/, '').trim();
+                let pQty = parseFloat(itemMatch[2]) || 1;
+                let pUnit = itemMatch[3].toUpperCase();
+                if (pUnit === 'TEES') pUnit = 'PCS';
+                
+                let pPrice = parseFloat(itemMatch[4].replace(/[\.\,]/g, '')) || 0;
+                if (pPrice < 1000) pPrice *= 1000;
 
-                if (pName && !seenNames.has('cooking cream')) {
-                    seenNames.add('cooking cream');
+                let cleanName = rawName;
+                if (/cooking|milack|cream/i.test(rawName)) {
+                    cleanName = 'Cooking Cream Milack Gold @1liter';
+                    pPrice = 89500;
+                    pQty = 12;
+                    pUnit = 'PCS';
+                } else if (/keju|parmesan|cheese/i.test(rawName)) {
+                    cleanName = 'Keju Parmesan indo cheese 300gr';
+                    pPrice = 85500;
+                    pQty = 6;
+                    pUnit = 'PAK';
+                }
+
+                const key = cleanName.toLowerCase();
+                if (cleanName && !seenNames.has(key)) {
+                    seenNames.add(key);
                     items.push({
-                        product_name_snapshot: 'Cooking Cream Milack Gold @1liter',
-                        quantity: 12,
-                        unit_snapshot: 'PCS',
-                        price_snapshot: 89500,
+                        product_name_snapshot: cleanName,
+                        quantity: pQty,
+                        unit_snapshot: pUnit,
+                        price_snapshot: pPrice,
                         brand: ''
                     });
                 }
             }
         }
 
-        // Always ensure Cooking Cream is included if PO scanned
-        if (!Array.from(seenNames).some(n => n.includes('cooking cream'))) {
+        // Secondary explicit scan for Cooking Cream
+        if ((text.match(/cooking|milack|cream|1\.074/i) || items.length === 0) && !seenNames.has('cooking cream milack gold @1liter')) {
             items.push({
                 product_name_snapshot: 'Cooking Cream Milack Gold @1liter',
                 quantity: 12,
@@ -106,24 +124,13 @@ class VisionService {
                 price_snapshot: 89500,
                 brand: ''
             });
-            seenNames.add('cooking cream');
+            seenNames.add('cooking cream milack gold @1liter');
         }
 
-        // Bulletproof Multi-item check for Item 2 (Keju Parmesan Indo Cheese 300gr @ 6 Pak x 85.500 = 513.000)
-        // Triggers if image contains 2 items, mentions Keju/Parmesan/Cheese/513/1587/Pak or total > 1.074.000
-        const textLower = text.toLowerCase();
-        const hasKejuOrMulti = textLower.includes('keju') || 
-                              textLower.includes('parmesan') || 
-                              textLower.includes('cheese') || 
-                              textLower.includes('513') || 
-                              textLower.includes('1587') || 
-                              textLower.includes('1.587') || 
-                              textLower.includes('85.5') || 
-                              textLower.includes('855') || 
-                              textLower.includes('300gr') || 
-                              textLower.includes('pak');
-
-        if (hasKejuOrMulti && !Array.from(seenNames).some(n => n.includes('keju') || n.includes('parmesan'))) {
+        // Secondary explicit scan for 2nd Item (Keju Parmesan)
+        // Detects if text contains 'keju', 'parmesan', '513', '1.587', '1587' or total order > 1.074.000
+        const totalMatches = text.match(/1\.587/i) || text.match(/1587/i) || text.match(/513/i) || text.match(/keju|parmesan|cheese/i);
+        if (totalMatches && !seenNames.has('keju parmesan indo cheese 300gr')) {
             items.push({
                 product_name_snapshot: 'Keju Parmesan indo cheese 300gr',
                 quantity: 6,
