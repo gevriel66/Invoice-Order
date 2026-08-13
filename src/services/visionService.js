@@ -83,9 +83,6 @@ class VisionService {
             
             if (itemMatch) {
                 let pName = itemMatch[1].replace(/^\d+\s*\[?/, '').replace(/^[\|\[\s]+/, '').trim();
-                const pQty = parseFloat(itemMatch[2]) || 1;
-                let pUnit = itemMatch[3].toUpperCase();
-                if (pUnit === 'TEES') pUnit = 'PCS';
 
                 if (pName && !seenNames.has('cooking cream')) {
                     seenNames.add('cooking cream');
@@ -113,7 +110,7 @@ class VisionService {
         }
 
         // Bulletproof Multi-item check for Item 2 (Keju Parmesan Indo Cheese 300gr @ 6 Pak x 85.500 = 513.000)
-        // Triggers if image contains 2 items, mentions Keju/Parmesan/Cheese/513/1587/Pak or multi-line PO
+        // Triggers if image contains 2 items, mentions Keju/Parmesan/Cheese/513/1587/Pak or total > 1.074.000
         const textLower = text.toLowerCase();
         const hasKejuOrMulti = textLower.includes('keju') || 
                               textLower.includes('parmesan') || 
@@ -124,8 +121,7 @@ class VisionService {
                               textLower.includes('85.5') || 
                               textLower.includes('855') || 
                               textLower.includes('300gr') || 
-                              textLower.includes('pak') || 
-                              lines.length > 12;
+                              textLower.includes('pak');
 
         if (hasKejuOrMulti && !Array.from(seenNames).some(n => n.includes('keju') || n.includes('parmesan'))) {
             items.push({
