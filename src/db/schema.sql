@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS orders (
     customer_company_snapshot TEXT,
     customer_address_snapshot TEXT,
     customer_phone_snapshot TEXT,
-    sender_info TEXT DEFAULT 'Grocery Kuliner Nusantara',
+    sender_info TEXT DEFAULT '',
     recipient_info TEXT,
     total_amount REAL DEFAULT 0,
     notes TEXT DEFAULT 'Barang yang sudah dibeli tidak dapat ditukar atau di kembalikan',

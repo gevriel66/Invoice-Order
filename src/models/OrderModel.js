@@ -100,7 +100,7 @@ class OrderModel {
                 data.customer_company_snapshot || '',
                 data.customer_address_snapshot || '',
                 data.customer_phone_snapshot || '',
-                data.sender_info || 'Grocery Kuliner Nusantara',
+                data.sender_info || '',
                 data.recipient_info || '',
                 totalCalculated,
                 data.notes || 'Barang yang sudah dibeli tidak dapat ditukar atau di kembalikan',
@@ -114,6 +114,24 @@ class OrderModel {
                 const draftInvNum = `DRAFT-${String(orderId).padStart(4, '0')}`;
                 db.prepare('UPDATE orders SET invoice_number = ? WHERE id = ?').run(draftInvNum, orderId);
             }
+
+            // Auto-generate PO Number and Ref Number if not provided by user
+            const orderIdPadded = String(orderId).padStart(3, '0');
+            const now = new Date();
+            const dd = String(now.getDate()).padStart(2, '0');
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const yyyy = now.getFullYear();
+
+            const finalPoNumber = (data.po_number && data.po_number.trim()) 
+                ? data.po_number.trim() 
+                : `${dd}${mm}${yyyy}/${orderIdPadded}`;
+            
+            const finalRefNumber = (data.ref_number && data.ref_number.trim())
+                ? data.ref_number.trim()
+                : `REF/${yyyy}${mm}/${orderIdPadded}`;
+
+            db.prepare('UPDATE orders SET po_number = ?, ref_number = ? WHERE id = ?')
+                .run(finalPoNumber, finalRefNumber, orderId);
 
             const insertItem = db.prepare(`
                 INSERT INTO order_items (
@@ -182,7 +200,7 @@ class OrderModel {
                 data.customer_company_snapshot || '',
                 data.customer_address_snapshot || '',
                 data.customer_phone_snapshot || '',
-                data.sender_info || 'Grocery Kuliner Nusantara',
+                data.sender_info || '',
                 data.recipient_info || '',
                 totalCalculated,
                 data.notes || 'Barang yang sudah dibeli tidak dapat ditukar atau di kembalikan',

@@ -95,10 +95,24 @@ try {
                 $ws.Cells.Item($r, 2).Value2 = $null
                 $ws.Cells.Item($r, 3).Value2 = $null
                 $ws.Cells.Item($r, 4).Value2 = $null
+                $ws.Cells.Item($r, 5).Value2 = $null
             }
 
             $items = $order.items
-            for ($i = 0; $i -lt [Math]::Min($items.Count, $maxRows); $i++) {
+            $itemCount = $items.Count
+
+            # Unhide rows that will contain items, hide empty rows (template has rows 15-20 hidden)
+            # Show 1 extra empty row after last item as spacer before Total
+            for ($r = $startRow; $r -lt ($startRow + $maxRows); $r++) {
+                $rowIndex = $r - $startRow
+                if ($rowIndex -lt $itemCount -or $rowIndex -eq $itemCount) {
+                    $ws.Rows.Item($r).Hidden = $false
+                } else {
+                    $ws.Rows.Item($r).Hidden = $true
+                }
+            }
+
+            for ($i = 0; $i -lt [Math]::Min($itemCount, $maxRows); $i++) {
                 $item = $items[$i]
                 $r = $startRow + $i
 
