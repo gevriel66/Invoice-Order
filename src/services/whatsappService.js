@@ -40,10 +40,6 @@ class WhatsAppService {
             }),
             takeoverOnConflict: true,
             takeoverTimeoutMs: 0,
-            webVersionCache: {
-                type: 'remote',
-                remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html'
-            },
             puppeteer: {
                 headless: true,
                 args: [
@@ -65,8 +61,16 @@ class WhatsAppService {
             qrcode.generate(qr, { small: true });
         });
 
+        let isReadyLogged = false;
+
         client.on('loading_screen', (percent, message) => {
             logger.info(`[WA SYNC] Progress: ${percent}% - ${message || 'Syncing chats...'}`);
+            if (percent === 100 && !isReadyLogged) {
+                isReadyLogged = true;
+                logger.info('==================================================');
+                logger.info('  WhatsApp Bot is READY & Listening for PO Photos!');
+                logger.info('==================================================');
+            }
         });
 
         client.on('change_state', (state) => {
@@ -74,9 +78,12 @@ class WhatsAppService {
         });
 
         client.on('ready', () => {
-            logger.info('==================================================');
-            logger.info('  WhatsApp Bot is READY & Listening for PO Photos!');
-            logger.info('==================================================');
+            if (!isReadyLogged) {
+                isReadyLogged = true;
+                logger.info('==================================================');
+                logger.info('  WhatsApp Bot is READY & Listening for PO Photos!');
+                logger.info('==================================================');
+            }
         });
 
         client.on('authenticated', () => {
