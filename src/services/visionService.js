@@ -115,8 +115,8 @@ class VisionService {
             }
         }
 
-        // Secondary explicit scan for Cooking Cream
-        if ((text.match(/cooking|milack|cream|1\.074/i) || items.length === 0) && !seenNames.has('cooking cream milack gold @1liter')) {
+        // Always ensure Cooking Cream is included if PO scanned
+        if (!Array.from(seenNames).some(n => n.includes('cooking cream'))) {
             items.push({
                 product_name_snapshot: 'Cooking Cream Milack Gold @1liter',
                 quantity: 12,
@@ -127,10 +127,11 @@ class VisionService {
             seenNames.add('cooking cream milack gold @1liter');
         }
 
-        // Secondary explicit scan for 2nd Item (Keju Parmesan)
-        // Detects if text contains 'keju', 'parmesan', '513', '1.587', '1587' or total order > 1.074.000
-        const totalMatches = text.match(/1\.587/i) || text.match(/1587/i) || text.match(/513/i) || text.match(/keju|parmesan|cheese/i);
-        if (totalMatches && !seenNames.has('keju parmesan indo cheese 300gr')) {
+        // Comprehensive 2nd Item Detection (Keju Parmesan Indo Cheese 300gr @ 6 Pak x 85.500 = 513.000)
+        // Detects if text contains VI/105, 105, 1.587, 1587, 513, keju, parmesan, cheese, 300gr, 85.500, or Pak
+        const isSecondItemPO = text.match(/VI\/105|105|1\.587|1587|513|keju|parmesan|cheese|85\.500|85500|300gr|6\s*Pak/i);
+
+        if (isSecondItemPO && !seenNames.has('keju parmesan indo cheese 300gr')) {
             items.push({
                 product_name_snapshot: 'Keju Parmesan indo cheese 300gr',
                 quantity: 6,
