@@ -196,12 +196,12 @@ class WhatsAppService {
                         }
                     }
 
-                    // Method 3: Last Resort Fallback - Inline base64 thumbnail
-                    if (!media || !media.data) {
-                        if (msg._data && msg._data.body && typeof msg._data.body === 'string' && msg._data.body.length > 50) {
+                    // Method 3: Last Resort Fallback - Inline base64 thumbnail (Only if valid > 500 chars)
+                    if (!media || !media.data || media.data.length < 500) {
+                        if (msg._data && msg._data.body && typeof msg._data.body === 'string' && msg._data.body.length > 500) {
                             try {
                                 media = new MessageMedia('image/jpeg', msg._data.body, 'wa_po_image.jpg');
-                                logger.info('Extracted fallback thumbnail media via msg._data.body');
+                                logger.info(`Extracted fallback thumbnail media via msg._data.body (${media.data.length} bytes)`);
                             } catch (errInline) {}
                         }
                     }
