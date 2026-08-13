@@ -112,6 +112,10 @@ class WhatsAppService {
 
         client.on('message_create', async (msg) => {
             try {
+                if (msg.hasMedia) {
+                    logger.info(`[WA MSG INCOMING] Media Message Received: type=${msg.type}, from=${msg.from}`);
+                }
+
                 // Check if message contains an image / photo
                 if (msg.hasMedia && (msg.type === 'image' || msg.type === 'sticker')) {
                     // Method 1: Try native downloadMedia() for FULL HD Resolution Image
