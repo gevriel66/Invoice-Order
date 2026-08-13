@@ -1,0 +1,23 @@
+2026/08/13-23:58:51.271 313c Reusing MANIFEST C:\Playground\Latihan\storage\wa_session\session-invoice-bot-session\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2026/08/13-23:58:51.271 313c Recovering log #148
+2026/08/13-23:58:51.302 313c Reusing old log C:\Playground\Latihan\storage\wa_session\session-invoice-bot-session\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/000148.log 
+2026/08/13-23:59:38.804 313c Level-0 table #158: started
+2026/08/13-23:59:38.830 313c Level-0 table #158: 1255626 bytes OK
+2026/08/13-23:59:38.831 313c Delete type=0 #148
+2026/08/13-23:59:38.833 313c Compacting 1@1 + 6@2 files
+2026/08/13-23:59:38.896 313c Generated table #159@1: 65967 keys, 2235069 bytes
+2026/08/13-23:59:38.919 313c Generated table #160@1: 7327 keys, 2152945 bytes
+2026/08/13-23:59:38.935 313c Generated table #161@1: 1819 keys, 2143271 bytes
+2026/08/13-23:59:38.974 313c Generated table #162@1: 16056 keys, 2213753 bytes
+2026/08/13-23:59:39.017 313c Generated table #163@1: 29694 keys, 2189817 bytes
+2026/08/13-23:59:39.097 313c Generated table #164@1: 100775 keys, 2252719 bytes
+2026/08/13-23:59:39.102 313c Generated table #165@1: 3306 keys, 167928 bytes
+2026/08/13-23:59:39.102 313c Compacted 1@1 + 6@2 files => 13355502 bytes
+2026/08/13-23:59:39.103 313c compacted to: files[ 0 0 7 0 0 0 0 ]
+2026/08/13-23:59:39.103 313c Delete type=2 #150
+2026/08/13-23:59:39.103 313c Delete type=2 #151
+2026/08/13-23:59:39.103 313c Delete type=2 #152
+2026/08/13-23:59:39.103 313c Delete type=2 #153
+2026/08/13-23:59:39.103 313c Delete type=2 #154
+2026/08/13-23:59:39.103 313c Delete type=2 #155
+2026/08/13-23:59:39.103 313c Delete type=2 #158
