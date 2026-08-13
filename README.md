@@ -16,12 +16,16 @@ Sistem aplikasi web lokal / desktop berbasis **Node.js + Express.js + SQLite (WA
 3. **Modul Transaksi & Riwayat**:
    * Pembuatan transaksi baru dengan pencarian produk autocomplete, autofill harga/satuan/brand, serta kalkulasi realtime subtotal & total.
    * Penomoran Invoice Otomatis berurutan (`INV/YYYYMM/001`) yang digenerate khusus saat transaksi berubah status menjadi `FINAL`.
+   * Auto-generate No. PO (`DDMMYYYY/XXX`) dan No. Referensi (`REF/YYYYMM/XXX`) secara otomatis.
    * Penguncian (*lock*) transaksi `FINAL` agar data riwayat tidak dapat diubah setelah dokumen diterbitkan.
 4. **Generator Dokumen PDF (Template-Driven Excel COM)**:
    * **Readonly Template Workflow**: Master template Excel (`Invoice Pembelian Bahan.xlsx` dan `Surat_Jalan_Barang.xlsx`) tersimpan aman dalam status readonly dan tidak pernah dimodifikasi oleh aplikasi.
    * **Isolasi Worksheet Eksplisit**: PDF Invoice diproses khusus dari worksheet `"Form Input"`, sedangkan Surat Jalan diproses dari `"Surat Jalan Barang"`. Worksheet referensi internal (`REFF`) 100% terisolasi dan tidak pernah masuk ke PDF.
    * **Preservasi Layout & Presisi Logo**: Mendukung logo eksternal (`Logo-Invoice.jpg` & `Logo-SuratJalan.png`) dengan menyisipkan logo secara presisi pada posisi template tanpa mengubah layout, font, border, margin, merge cell, maupun formula.
-5. **Infrastruktur Produksi & Logging**:
+5. **Keamanan & Antarmuka Responsif Mobile**:
+   * **Keamanan Terproteksi**: Proteksi token CSRF pada seluruh form `POST`, Rate Limiting percobaan login (maks 10x/15 menit), Path Traversal Guard pada pengunduhan dokumen, dan HTTP Security Headers (`nosniff`, `SAMEORIGIN`, `XSS-Protection`).
+   * **Responsif Mobile**: Sidebar Offcanvas Drawer dengan tombol Hamburger Toggle untuk perangkat smartphone & tablet, serta pembungkus tabel & grid responsif.
+6. **Infrastruktur Produksi & Logging**:
    * Penanganan error terstruktur dan pencatatan log produksi otomatis pada `logs/app.log` dan `logs/error.log`.
 
 ---

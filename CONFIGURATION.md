@@ -50,5 +50,10 @@ LOGO_SJ_PATH=Logo-SuratJalan.png
    Jangan pernah mengunggah (*commit*) file `.env` ke repository publik Git. File `.env` telah dimasukkan ke dalam aturan `.gitignore`.
 2. **Ubah `SESSION_SECRET`**:
    Gunakan string acak minimal 32 karakter untuk `SESSION_SECRET` pada server produksi.
-3. **Penyimpanan Database Terpisah (Opsional)**:
+3. **Proteksi Keamanan Aktif**:
+   * **CSRF Protection**: Aktif secara otomatis pada seluruh endpoint `POST`/`PUT`/`DELETE`.
+   * **Rate Limiter Login**: Membatasi percobaan login hingga 10x per 15 menit per IP.
+   * **HTTP Security Headers**: Menyertakan header `nosniff`, `SAMEORIGIN`, dan `XSS-Protection`.
+   * **Path Traversal Guard**: Mencegah akses unduhan file di luar direktori `storage/`.
+4. **Penyimpanan Database Terpisah (Opsional)**:
    Pada server produksi, variabel `DB_PATH` dapat diatur ke folder data terpisah di luar folder aplikasi (misal: `D:\DatabaseProduction\invoice.sqlite`) untuk mempermudah manajemen backup disk terpisah.
