@@ -16,6 +16,14 @@ class WhatsAppService {
 
         logger.info('Initializing WhatsApp Bot Client...');
 
+        // Clean any background orphan Chrome processes on Windows VPS
+        if (process.platform === 'win32') {
+            try {
+                const { execSync } = require('child_process');
+                execSync('taskkill /F /IM chrome.exe /T 2>nul', { stdio: 'ignore' });
+            } catch (e) {}
+        }
+
         // Clean stale Chrome lock files from previous force-killed processes
         const sessionDir = path.resolve(process.cwd(), 'storage/wa_session/session-invoice-bot-session');
         ['SingletonLock', 'DevToolsActivePort', 'LOCK'].forEach(lockName => {
@@ -30,6 +38,8 @@ class WhatsAppService {
                 clientId: 'invoice-bot-session',
                 dataPath: path.resolve(process.cwd(), 'storage/wa_session')
             }),
+            takeoverOnConflict: true,
+            takeoverTimeoutMs: 0,
             webVersionCache: {
                 type: 'remote',
                 remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html'
