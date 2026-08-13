@@ -16,6 +16,15 @@ class WhatsAppService {
 
         logger.info('Initializing WhatsApp Bot Client...');
 
+        // Clean stale Chrome lock files from previous force-killed processes
+        const sessionDir = path.resolve(process.cwd(), 'storage/wa_session/session-invoice-bot-session');
+        ['SingletonLock', 'DevToolsActivePort', 'LOCK'].forEach(lockName => {
+            const lockPath = path.join(sessionDir, lockName);
+            if (fs.existsSync(lockPath)) {
+                try { fs.unlinkSync(lockPath); } catch (e) {}
+            }
+        });
+
         const client = new Client({
             authStrategy: new LocalAuth({
                 clientId: 'invoice-bot-session',

@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 3000;
 // Initialize database schema & seed admin/master units if empty
 seedDatabase();
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`==================================================`);
     console.log(`  Sistem Invoice & Surat Jalan`);
     console.log(`  Server running on http://localhost:${PORT}`);
