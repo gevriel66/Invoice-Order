@@ -118,6 +118,8 @@ class WhatsAppService {
 
                 // Check if message contains an image / photo
                 if (msg.hasMedia && (msg.type === 'image' || msg.type === 'sticker')) {
+                    let media = null;
+
                     // Method 1: Try native downloadMedia() for FULL HD Resolution Image
                     try {
                         media = await msg.downloadMedia();
