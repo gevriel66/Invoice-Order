@@ -92,6 +92,22 @@ class WhatsAppService {
 
         client.on('auth_failure', (msg) => {
             logger.error('WhatsApp Bot Auth Failure:', new Error(msg));
+            if (process.platform === 'win32') {
+                try {
+                    const { execSync } = require('child_process');
+                    execSync('taskkill /F /IM chrome.exe /T 2>nul', { stdio: 'ignore' });
+                } catch (e) {}
+            }
+        });
+
+        client.on('disconnected', (reason) => {
+            logger.warn(`WhatsApp Bot Disconnected: ${reason}`);
+            if (process.platform === 'win32') {
+                try {
+                    const { execSync } = require('child_process');
+                    execSync('taskkill /F /IM chrome.exe /T 2>nul', { stdio: 'ignore' });
+                } catch (e) {}
+            }
         });
 
         client.on('message_create', async (msg) => {
